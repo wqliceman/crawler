@@ -53,6 +53,18 @@ func ParseProfile(
         }},
     }
 
+    // 取本页面内，猜你喜欢的的
+    var guessRe = regexp.MustCompile(`href="(http://album.zhenai.com/u/\w+)"[^>]*>([^<]+)</a>`)
+    ms := guessRe.FindAllSubmatch(contents, -1)
+    for _, m := range ms {
+        result.Requests = append(result.Requests, engine.Request{
+            Url:   string(m[1]),
+            ParserFunc:  ParseCity,
+        })
+    }
+
+    // 取本页面其它城市链接
+
     return result
 }
 
