@@ -3,6 +3,7 @@ package parser
 import (
     "github.com/wqliceman/crawler/basic/engine"
     "github.com/wqliceman/crawler/basic/model"
+    "github.com/wqliceman/crawler/distributed/config"
     "regexp"
     "strings"
 )
@@ -11,7 +12,7 @@ var purpleRe = regexp.MustCompile(`<div class="m-btn purple" data-v-8b1eac0c>([^
 var pinkRe = regexp.MustCompile(`<div class="m-btn pink" data-v-8b1eac0c>([^<]+)</div>`)
 var idUrlRe = regexp.MustCompile(`http://album.zhenai.com/u/([\d]+)`)
 
-func ParseProfile(
+func parseProfile(
     contents []byte,
     url string,
     name string,
@@ -59,7 +60,8 @@ func ParseProfile(
     for _, m := range ms {
         result.Requests = append(result.Requests, engine.Request{
             Url:   string(m[1]),
-            ParserFunc:  ParseCity,
+            Parser:  engine.NewFuncParser(
+                ParseCity, config.ParseCity),
         })
     }
 
@@ -74,5 +76,31 @@ func extractString(c []byte, r *regexp.Regexp) string {
         return string(match[1])
     } else {
         return ""
+    }
+}
+
+type ProfileParser struct {
+    userName string
+    gender string
+}
+
+func (p *ProfileParser) Parse(
+    contents []byte, url string) engine.ParseResult {
+    return parseProfile(contents, url, p.userName,p.gender)
+}
+
+func (p *ProfileParser) Serialize() (name string, args interface{}) {
+    var profileArgs = make(map[string]string)
+    profileArgs["Name"] = p.userName
+    profileArgs["Gender"] = p.gender
+
+    return config.ParseProfile,profileArgs
+}
+
+func NewProfileParser(name string,
+    gender string) *ProfileParser {
+    return &ProfileParser{
+        userName: name,
+        gender:   gender,
     }
 }

@@ -1,4 +1,4 @@
-module github.com/wqliceman/crawler/basic
+module github.com/wqliceman/crawler
 
 go 1.13
 

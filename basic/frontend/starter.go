@@ -5,12 +5,14 @@ import (
 	"net/http"
 )
 
+
+const basePath = "/Users/iceman/Develops/dev/go/src/github.com/wqliceman/crawler/basic/frontend/"
 func main() {
 	http.Handle("/", http.FileServer(
-		http.Dir("./view")))
+		http.Dir(basePath + "view")))
 	http.Handle("/search",
 		controller.CreateSearchResultHandler(
-			"./view/template.html"))
+			basePath + "view/template.html"))
 
 	err := http.ListenAndServe(":8888", nil)
 	if err != nil {

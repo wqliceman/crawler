@@ -4,7 +4,10 @@ type ConcurrentEngine struct {
 	Scheduler   Scheduler
 	WorkerCount int
 	ItemChan	chan Item
+	RequestProcessor Processor
 }
+
+type Processor func(request Request) (ParseResult, error)
 
 type Scheduler interface {
     ReadyNotifier
@@ -22,7 +25,7 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 	e.Scheduler.Run()
 
 	for i := 0; i < e.WorkerCount; i++ {
-		createWorker(e.Scheduler.WorkerChan(),
+		e.createWorker(e.Scheduler.WorkerChan(),
 			out,
 			e.Scheduler)
 	}
@@ -43,7 +46,7 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 	}
 }
 
-func createWorker(
+func (e *ConcurrentEngine) createWorker(
 	in chan Request,
 	out chan ParseResult,
 	ready ReadyNotifier) {
@@ -51,7 +54,7 @@ func createWorker(
 		for {
 			ready.WorkerReady(in)
 			request := <-in
-			parseResult, err := worker(request)
+			parseResult, err := e.RequestProcessor(request)
 			if err != nil {
 				continue
 			}
@@ -59,3 +62,5 @@ func createWorker(
 		}
 	}()
 }
+
+

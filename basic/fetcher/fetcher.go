@@ -3,6 +3,7 @@ package fetcher
 import (
 	"bufio"
 	"fmt"
+	"github.com/wqliceman/crawler/distributed/config"
 	"golang.org/x/net/html/charset"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/unicode"
@@ -13,10 +14,13 @@ import (
 	"time"
 )
 
-var rateLimiter = time.Tick(150 * time.Millisecond)
+var rateLimiter = time.Tick(130 * time.Second/config.Qps)
 
 func Fetch(url string) ([]byte, error) {
 	<-rateLimiter
+
+	log.Printf("Fetching url %s\n", url)
+
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36")
 	var httpClient = http.Client{}

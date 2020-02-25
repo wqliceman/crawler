@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"github.com/wqliceman/crawler/basic/engine"
+	"github.com/wqliceman/crawler/distributed/config"
 	"regexp"
 )
 
@@ -18,7 +19,8 @@ func ParseCityList(contents []byte, _ string) engine.ParseResult {
 		result.Requests = append(result.Requests,
 			engine.Request{
 				Url:        string(m[1]),
-				ParserFunc: ParseCity,
+				Parser: engine.NewFuncParser(
+					ParseCity, config.ParseCity),
 			})
 		limit--
 		if limit == 0 {
